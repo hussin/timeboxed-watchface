@@ -43,7 +43,12 @@ void bt_handler(bool connected) {
     } else {
         bool did_vibrate = persist_exists(KEY_BLUETOOTHDISCONNECT) ? persist_read_int(KEY_BLUETOOTHDISCONNECT): 0;
         if (is_bluetooth_vibrate_enabled() && !is_user_sleeping() && !did_vibrate) {
-            vibes_long_pulse();
+            static uint32_t const segments[] = { 200, 100, 100, 100, 500 };
+            VibePattern pat = {
+                .durations = segments,
+                .num_segments = ARRAY_LENGTH(segments),
+            };
+            vibes_enqueue_custom_pattern(pat);
             persist_write_int(KEY_BLUETOOTHDISCONNECT, 1);
         }
         set_bluetooth_color();
