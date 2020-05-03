@@ -17,6 +17,7 @@ static Window *watchface;
 
 #if defined(PBL_HEALTH)
 static int min_count = 0;
+static int min_count_phbatt = 0;
 static int min_count_crypto = 0;
 static uint8_t health_color_keys[] = {
     KEY_STEPSCOLOR,
@@ -561,10 +562,10 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
         if (is_phonebattery_enabled()) {
             #if defined(PBL_HEALTH)
                 if (is_user_sleeping()) {
-                    min_count++;
-                    if (min_count > 90) {
+                    min_count_phbatt++;
+                    if (min_count_phbatt > 90) {
                         update_phonebattery(false);
-                        min_count = 0;
+                        min_count_phbatt = 0;
                     }
                 } else {
                     update_phonebattery(false);

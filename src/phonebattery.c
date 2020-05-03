@@ -6,9 +6,8 @@
 
 static bool phonebattery_enabled;
 static int last_update = 0;
-static int last_successfull_update = 0;
 static int phonebattery_interval = 5;
-static int phonebattery_expiration = 7; //interval + 2 retries
+static int phonebattery_expiration = 30;
 static AppTimer *retry_timer;
 
 static void retry_handler(void *context) {
@@ -18,7 +17,7 @@ static void retry_handler(void *context) {
 void update_phonebattery(bool force) {
   int current_time = (int)time(NULL);
   if (force || last_update == 0 || (current_time - last_update) >= phonebattery_interval * 60) {
-    if ((current_time - last_successfull_update) >= phonebattery_expiration * 60) {
+    if ((current_time - last_update) >= phonebattery_expiration * 60) {
       set_phonebattery_layer_text("");
     }
     DictionaryIterator *iter;
@@ -26,7 +25,6 @@ void update_phonebattery(bool force) {
     if (result == APP_MSG_OK) {
       dict_write_uint8(iter, KEY_REQUESTPHONEBATTERY, 1);
       result = app_message_outbox_send();
-
       if (result == APP_MSG_OK) {
 	if (force) {
 	  set_phonebattery_layer_text("");
@@ -46,7 +44,6 @@ static bool get_phonebattery_enabled() {
 void update_phonebattery_value(int lvl_val, int chg_val) {
   if (is_module_enabled(MODULE_PHONEBATTERY)) {
     char s_phonebattery_buffer[8];
-    last_successfull_update = (int)time(NULL);
 
     if (chg_val) {
       snprintf(s_phonebattery_buffer, sizeof(s_phonebattery_buffer), (lvl_val < 20 ? "!+%d%%" :"+%d%%"), lvl_val);
