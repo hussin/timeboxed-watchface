@@ -11,6 +11,7 @@
 #include "accel.h"
 #include "compass.h"
 #include "crypto.h"
+#include "phonebattery.h"
 
 static Window *watchface;
 
@@ -153,6 +154,18 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
         return;
     }
     #endif
+
+    Tuple *phonebattery_level = dict_find(iterator, KEY_PHONEBATTERY_LEVEL);
+    Tuple *phonebattery_charging = dict_find(iterator, KEY_PHONEBATTERY_CHARGING);
+
+    if (phonebattery_level || phonebattery_charging) {
+
+        int phbatt_lvl_val = (int)phonebattery_level->value->int32;
+        int phbatt_chg_val = (int)phonebattery_charging->value->int32;
+
+	update_phonebattery_value(phbatt_lvl_val,phbatt_chg_val);
+        return;
+    }
 
     int configs = 0;
     signed int tz_hour = 0;
@@ -305,6 +318,8 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
         KEY_UPDATECOLOR,
         KEY_BATTERYCOLOR,
         KEY_BATTERYLOWCOLOR,
+        KEY_PHONEBATTERYCOLOR,
+        KEY_PHONEBATTERYLOWCOLOR,	
         KEY_TEMPCOLOR,
         KEY_WEATHERCOLOR,
         KEY_MINCOLOR,
@@ -332,6 +347,8 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
         KEY_UPDATECOLOR,
         KEY_BATTERYCOLOR,
         KEY_BATTERYLOWCOLOR,
+        KEY_PHONEBATTERYCOLOR,
+        KEY_PHONEBATTERYLOWCOLOR,
         KEY_TEMPCOLOR,
         KEY_WEATHERCOLOR,
         KEY_MINCOLOR,
@@ -540,6 +557,22 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
                 update_weather(false);
             #endif
         }
+
+        if (is_phonebattery_enabled()) {
+            #if defined(PBL_HEALTH)
+                if (is_user_sleeping()) {
+                    min_count++;
+                    if (min_count > 90) {
+                        update_phonebattery(false);
+                        min_count = 0;
+                    }
+                } else {
+                    update_phonebattery(false);
+                }
+            #else
+                update_phonebattery(false);
+            #endif
+        }	
 
         #if !defined PBL_PLATFORM_APLITE
         if (is_crypto_enabled()) {

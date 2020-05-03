@@ -38,6 +38,7 @@ static TextLayer *sunset_icon;
 static TextLayer *compass;
 static TextLayer *degrees;
 static TextLayer *seconds;
+static TextLayer *phonebattery;
 
 #if !defined PBL_PLATFORM_APLITE
 static TextLayer *alt_time_b;
@@ -57,6 +58,9 @@ static GFont custom_font;
 static GColor base_color;
 static GColor battery_color;
 static GColor battery_low_color;
+
+static GColor phonebattery_color;
+static GColor phonebattery_low_color;
 
 #if defined(PBL_HEALTH)
 static GColor steps_color;
@@ -98,6 +102,7 @@ static char sunset_icon_text[4];
 static char compass_text[4];
 static char degrees_text[8];
 static char seconds_text[4];
+static char phonebattery_text[8];
 
 #if !defined PBL_PLATFORM_APLITE
 static char alt_time_b_text[22];
@@ -359,6 +364,17 @@ void create_text_layers(Window* window) {
                     is_simple_mode_enabled() || slot > 3 ? text_align : (slot % 2 == 0 ? GTextAlignmentLeft : GTextAlignmentRight)));
     }
 
+    slot = get_slot_for_module(MODULE_PHONEBATTERY);
+    if (slot != -1) {
+
+        pos = get_pos_for_item(slot, PHONEBATTERY_ITEM, mode, selected_font, width, height);
+        phonebattery = text_layer_create(GRect(pos.x, pos.y, PBL_IF_ROUND_ELSE(width, slot > 3 ? width : slot_width), 50));
+        text_layer_set_background_color(phonebattery, GColorClear);
+        text_layer_set_text_alignment(phonebattery, PBL_IF_ROUND_ELSE(GTextAlignmentCenter,
+                    is_simple_mode_enabled() || slot > 3 ? text_align : (slot % 2 == 0 ? GTextAlignmentLeft : GTextAlignmentRight)));
+      
+    }
+
     #if !defined PBL_PLATFORM_APLITE
     slot = get_slot_for_module(MODULE_CRYPTO);
     if (slot != -1) {
@@ -470,6 +486,7 @@ void create_text_layers(Window* window) {
     add_text_layer(window_layer, date);
     add_text_layer(window_layer, alt_time);
     add_text_layer(window_layer, battery);
+    add_text_layer(window_layer, phonebattery);
     add_text_layer(window_layer, bluetooth);
     add_text_layer(window_layer, update);
     add_text_layer(window_layer, weather);
@@ -518,6 +535,8 @@ void destroy_text_layers() {
     alt_time = NULL;
     delete_text_layer(battery);
     battery = NULL;
+    delete_text_layer(phonebattery);
+    phonebattery = NULL;
     delete_text_layer(bluetooth);
     bluetooth = NULL;
     delete_text_layer(update);
@@ -654,6 +673,7 @@ void set_face_fonts() {
     set_text_font(date, medium_font);
     set_text_font(alt_time, base_font);
     set_text_font(battery, base_font);
+    set_text_font(phonebattery, base_font);
     set_text_font(bluetooth, custom_font);
     set_text_font(update, custom_font);
     set_text_font(weather, weather_font);
@@ -718,6 +738,11 @@ void set_colors(Window *window) {
         battery_color = enable_advanced ? GColorFromHEX(persist_read_int(KEY_BATTERYCOLOR)) : base_color;
         battery_low_color = enable_advanced ? GColorFromHEX(persist_read_int(KEY_BATTERYLOWCOLOR)) : base_color;
     }
+
+    if (is_module_enabled(MODULE_PHONEBATTERY)) {
+        phonebattery_color = enable_advanced ? GColorFromHEX(persist_read_int(KEY_PHONEBATTERYCOLOR)) : base_color;
+        phonebattery_low_color = enable_advanced ? GColorFromHEX(persist_read_int(KEY_PHONEBATTERYLOWCOLOR)) : base_color;
+    }    
 
     window_set_background_color(window, persist_read_int(KEY_BGCOLOR) ? GColorFromHEX(persist_read_int(KEY_BGCOLOR)) : GColorBlack);
 
@@ -830,6 +855,14 @@ void set_battery_color(int percentage) {
     }
 }
 
+void set_phonebattery_color(int percentage) {
+    if (percentage > 10) {
+        set_text_color(phonebattery, phonebattery_color);
+    } else {
+        set_text_color(phonebattery, phonebattery_low_color);
+    }
+}
+
 void set_hours_layer_text(char* text) {
     strcpy(hour_text, text);
     set_text(hours, hour_text);
@@ -860,6 +893,11 @@ void set_alt_time_b_layer_text(char* text) {
 void set_battery_layer_text(char* text) {
     strcpy(battery_text, text);
     set_text(battery, battery_text);
+}
+
+void set_phonebattery_layer_text(char* text) {
+    strcpy(phonebattery_text, text);
+    set_text(phonebattery, phonebattery_text);
 }
 
 void set_bluetooth_layer_text(char* text) {

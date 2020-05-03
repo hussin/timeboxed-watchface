@@ -10,6 +10,7 @@
 #include "compass.h"
 #include "clock.h"
 #include "crypto.h"
+#include "phonebattery.h"
 
 void load_screen(uint8_t reload_origin, Window *watchface) {
     load_locale();
@@ -28,6 +29,7 @@ void load_screen(uint8_t reload_origin, Window *watchface) {
     #endif
 
     toggle_weather(reload_origin);
+    toggle_phonebattery(reload_origin);
     #if !defined PBL_PLATFORM_APLITE
     toggle_crypto(reload_origin);
     #endif

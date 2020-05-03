@@ -19,6 +19,7 @@ uint8_t get_loaded_font();
 void set_bluetooth_color();
 void set_update_color();
 void set_battery_color();
+void set_phonebattery_color();
 
 void set_hours_layer_text(char*);
 void set_date_layer_text(char*);
@@ -27,6 +28,7 @@ void set_alt_time_layer_text(char*);
 void set_alt_time_b_layer_text(char*);
 #endif
 void set_battery_layer_text(char*);
+void set_phonebattery_layer_text(char*);
 void set_bluetooth_layer_text(char*);
 void set_temp_cur_layer_text(char*);
 void set_temp_max_layer_text(char*);
