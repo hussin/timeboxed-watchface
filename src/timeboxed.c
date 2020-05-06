@@ -156,6 +156,8 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
     }
     #endif
 
+    
+    #if !defined PBL_PLATFORM_APLITE
     Tuple *phonebattery_level = dict_find(iterator, KEY_PHONEBATTERY_LEVEL);
     Tuple *phonebattery_charging = dict_find(iterator, KEY_PHONEBATTERY_CHARGING);
 
@@ -167,6 +169,7 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
 	update_phonebattery_value(phbatt_lvl_val,phbatt_chg_val);
         return;
     }
+    #endif
 
     int configs = 0;
     signed int tz_hour = 0;
@@ -286,8 +289,9 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
         KEY_WEATHERTIME,
         KEY_DATESEPARATOR,
         KEY_CRYPTOTIME,
+	KEY_PHONEBATTERYTIME,
     };
-    uint8_t num_int = 8;
+    uint8_t num_int = 9;
     #else
     uint32_t int_keys[] = {
         KEY_FONTTYPE,
@@ -337,7 +341,7 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
         KEY_CRYPTOCCOLOR,
         KEY_CRYPTODCOLOR,
     };
-    uint8_t num_colors = 23;
+    uint8_t num_colors = 25;
     #else
     uint32_t color_keys[] = {
         KEY_BGCOLOR,
@@ -348,8 +352,6 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
         KEY_UPDATECOLOR,
         KEY_BATTERYCOLOR,
         KEY_BATTERYLOWCOLOR,
-        KEY_PHONEBATTERYCOLOR,
-        KEY_PHONEBATTERYLOWCOLOR,
         KEY_TEMPCOLOR,
         KEY_WEATHERCOLOR,
         KEY_MINCOLOR,
@@ -559,6 +561,7 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
             #endif
         }
 
+        #if !defined PBL_PLATFORM_APLITE
         if (is_phonebattery_enabled()) {
             #if defined(PBL_HEALTH)
                 if (is_user_sleeping()) {
@@ -573,7 +576,8 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
             #else
                 update_phonebattery(false);
             #endif
-        }	
+        }
+        #endif
 
         #if !defined PBL_PLATFORM_APLITE
         if (is_crypto_enabled()) {

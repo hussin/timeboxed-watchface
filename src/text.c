@@ -38,7 +38,6 @@ static TextLayer *sunset_icon;
 static TextLayer *compass;
 static TextLayer *degrees;
 static TextLayer *seconds;
-static TextLayer *phonebattery;
 
 #if !defined PBL_PLATFORM_APLITE
 static TextLayer *alt_time_b;
@@ -46,6 +45,7 @@ static TextLayer *crypto;
 static TextLayer *crypto_b;
 static TextLayer *crypto_c;
 static TextLayer *crypto_d;
+static TextLayer *phonebattery;
 #endif
 
 static GFont time_font;
@@ -59,8 +59,10 @@ static GColor base_color;
 static GColor battery_color;
 static GColor battery_low_color;
 
+#if !defined PBL_PLATFORM_APLITE
 static GColor phonebattery_color;
 static GColor phonebattery_low_color;
+#endif
 
 #if defined(PBL_HEALTH)
 static GColor steps_color;
@@ -102,7 +104,6 @@ static char sunset_icon_text[4];
 static char compass_text[4];
 static char degrees_text[8];
 static char seconds_text[4];
-static char phonebattery_text[8];
 
 #if !defined PBL_PLATFORM_APLITE
 static char alt_time_b_text[22];
@@ -110,6 +111,7 @@ static char crypto_text[8];
 static char crypto_b_text[8];
 static char crypto_c_text[8];
 static char crypto_d_text[8];
+static char phonebattery_text[8];
 #endif
 
 #if defined(PBL_HEALTH)
@@ -364,6 +366,7 @@ void create_text_layers(Window* window) {
                     is_simple_mode_enabled() || slot > 3 ? text_align : (slot % 2 == 0 ? GTextAlignmentLeft : GTextAlignmentRight)));
     }
 
+    #if !defined PBL_PLATFORM_APLITE
     slot = get_slot_for_module(MODULE_PHONEBATTERY);
     if (slot != -1) {
 
@@ -375,7 +378,6 @@ void create_text_layers(Window* window) {
       
     }
 
-    #if !defined PBL_PLATFORM_APLITE
     slot = get_slot_for_module(MODULE_CRYPTO);
     if (slot != -1) {
         pos = get_pos_for_item(slot, CRYPTO_ITEM, mode, selected_font, width, height);
@@ -486,7 +488,6 @@ void create_text_layers(Window* window) {
     add_text_layer(window_layer, date);
     add_text_layer(window_layer, alt_time);
     add_text_layer(window_layer, battery);
-    add_text_layer(window_layer, phonebattery);
     add_text_layer(window_layer, bluetooth);
     add_text_layer(window_layer, update);
     add_text_layer(window_layer, weather);
@@ -507,6 +508,7 @@ void create_text_layers(Window* window) {
     add_text_layer(window_layer, seconds);
 
     #if !defined PBL_PLATFORM_APLITE
+    add_text_layer(window_layer, phonebattery);
     add_text_layer(window_layer, alt_time_b);
     add_text_layer(window_layer, crypto);
     add_text_layer(window_layer, crypto_b);
@@ -535,8 +537,6 @@ void destroy_text_layers() {
     alt_time = NULL;
     delete_text_layer(battery);
     battery = NULL;
-    delete_text_layer(phonebattery);
-    phonebattery = NULL;
     delete_text_layer(bluetooth);
     bluetooth = NULL;
     delete_text_layer(update);
@@ -575,6 +575,8 @@ void destroy_text_layers() {
     seconds = NULL;
 
     #if !defined PBL_PLATFORM_APLITE
+    delete_text_layer(phonebattery);
+    phonebattery = NULL;
     delete_text_layer(alt_time_b);
     alt_time_b = NULL;
     delete_text_layer(crypto);
@@ -673,7 +675,6 @@ void set_face_fonts() {
     set_text_font(date, medium_font);
     set_text_font(alt_time, base_font);
     set_text_font(battery, base_font);
-    set_text_font(phonebattery, base_font);
     set_text_font(bluetooth, custom_font);
     set_text_font(update, custom_font);
     set_text_font(weather, weather_font);
@@ -694,6 +695,7 @@ void set_face_fonts() {
     set_text_font(seconds, base_font);
 
     #if !defined PBL_PLATFORM_APLITE
+    set_text_font(phonebattery, base_font);
     set_text_font(alt_time_b, base_font);
     set_text_font(crypto, base_font);
     set_text_font(crypto_b, base_font);
@@ -739,11 +741,13 @@ void set_colors(Window *window) {
         battery_low_color = enable_advanced ? GColorFromHEX(persist_read_int(KEY_BATTERYLOWCOLOR)) : base_color;
     }
 
+    #if !defined PBL_PLATFORM_APLITE
     if (is_module_enabled(MODULE_PHONEBATTERY)) {
         phonebattery_color = enable_advanced ? GColorFromHEX(persist_read_int(KEY_PHONEBATTERYCOLOR)) : base_color;
         phonebattery_low_color = enable_advanced ? GColorFromHEX(persist_read_int(KEY_PHONEBATTERYLOWCOLOR)) : base_color;
     }    
-
+    #endif
+    
     window_set_background_color(window, persist_read_int(KEY_BGCOLOR) ? GColorFromHEX(persist_read_int(KEY_BGCOLOR)) : GColorBlack);
 
     #if defined(PBL_HEALTH)
@@ -855,6 +859,7 @@ void set_battery_color(int percentage) {
     }
 }
 
+#if !defined PBL_PLATFORM_APLITE
 void set_phonebattery_color(int percentage) {
     if (percentage > 10) {
         set_text_color(phonebattery, phonebattery_color);
@@ -862,6 +867,7 @@ void set_phonebattery_color(int percentage) {
         set_text_color(phonebattery, phonebattery_low_color);
     }
 }
+#endif
 
 void set_hours_layer_text(char* text) {
     strcpy(hour_text, text);
@@ -895,10 +901,12 @@ void set_battery_layer_text(char* text) {
     set_text(battery, battery_text);
 }
 
+#if !defined PBL_PLATFORM_APLITE
 void set_phonebattery_layer_text(char* text) {
     strcpy(phonebattery_text, text);
     set_text(phonebattery, phonebattery_text);
 }
+#endif
 
 void set_bluetooth_layer_text(char* text) {
     strcpy(bluetooth_text, text);

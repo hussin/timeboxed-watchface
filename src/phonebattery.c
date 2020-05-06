@@ -4,6 +4,8 @@
 #include "keys.h"
 #include "text.h"
 
+#if !defined PBL_PLATFORM_APLITE
+
 static bool phonebattery_enabled;
 static int last_update = 0;
 static int phonebattery_interval = 5;
@@ -65,8 +67,6 @@ void toggle_phonebattery(uint8_t reload_origin) {
     if (phonebattery_enabled) {
       if (reload_origin == RELOAD_MODULE || reload_origin == RELOAD_CONFIGS) {
 	update_phonebattery(true);
-      } else {
-	update_phonebattery(false);
       }
     } else {
       set_phonebattery_layer_text("");
@@ -76,3 +76,5 @@ void toggle_phonebattery(uint8_t reload_origin) {
 bool is_phonebattery_enabled() {
   return phonebattery_enabled;
 }
+
+#endif
