@@ -75,7 +75,7 @@ class Layout extends Component {
         ];
 
         this.modulesAplite = this.modulesAll.filter(
-            (module) => ['0', '1', '2', '8', '11', '12', '15', '16', '17', '24'].indexOf(module.value) !== -1
+            (module) => ['0', '1', '2', '8', '11', '12', '15', '16', '17'].indexOf(module.value) !== -1
         );
 
         this.textModulesAll = [
@@ -89,7 +89,7 @@ class Layout extends Component {
         ].sort((a, b) => parseInt(a.value, 10) - parseInt(b.value, 10));
 
         this.textModulesAplite = this.textModulesAll.filter(
-            (module) => ['0', '16', '17', '18', '24'].indexOf(module.value) !== -1
+            (module) => ['0', '16', '17', '18'].indexOf(module.value) !== -1
         );
 
         this.timezones = allTimezones;
