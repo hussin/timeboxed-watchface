@@ -57,7 +57,6 @@ Pebble.addEventListener('appmessage', function(e) {
             useCelsius,
             localStorage.overrideLocation
         );
-        // getPhoneBattery();	
     } else if (e.payload.KEY_REQUESTCRYPTO) {
         console.log('Retrieving cryptocurrencies...');
         getCryptocurrencies();
