@@ -143,7 +143,8 @@ Pebble.addEventListener('webviewclosed', function(e) {
 
         if (
             key === 'KEY_WEATHERTIME' ||
-            key === 'KEY_CRYPTOTIME'
+	    key === 'KEY_CRYPTOTIME' ||
+	    key === 'KEY_PHONEBATTERYTIME'	
         ) {
             value = parseInt(value || '15', 10);
         }
