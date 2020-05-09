@@ -7,41 +7,14 @@
 #if !defined PBL_PLATFORM_APLITE
 
 static bool phonebattery_enabled;
+static bool force_update = false;
 static int last_update = 0;
 static int phonebattery_interval = 5;
-static int phonebattery_expiration = 30;
+/* exp time == 90 + 10 extra (because in timeboxed.c time when pebble 
+health available delay may be up to 90 minutes) */
+static int phonebattery_expiration = 100;
 static int phonebattery_level;
 static int phonebattery_charging;
-static AppTimer *retry_timer;
-
-static void retry_handler(void *context) { update_phonebattery(true); }
-
-void update_phonebattery(bool force) {
-  int current_time = (int)time(NULL);
-  if (force || last_update == 0 || (current_time - last_update) >= phonebattery_interval * 60) {
-    if ((current_time - last_update) >= phonebattery_expiration * 60) {
-      set_phonebattery_layer_text("");
-    }
-    DictionaryIterator *iter;
-    AppMessageResult result = app_message_outbox_begin(&iter);
-    if (result == APP_MSG_OK) {
-      dict_write_uint8(iter, KEY_REQUESTPHONEBATTERY, 1);
-      result = app_message_outbox_send();
-      if (result == APP_MSG_OK) {
-	if (force) {
-	  set_phonebattery_layer_text("");
-	}
-	last_update = current_time;
-      }
-    } else if (force) {
-          retry_timer = app_timer_register(1000, retry_handler, NULL);
-        }
-  }
-}
-
-static bool get_phonebattery_enabled() {
-  return is_module_enabled(MODULE_PHONEBATTERY);
-}
 
 void update_phonebattery_value(int lvl_val, int chg_val) {
   if (is_module_enabled(MODULE_PHONEBATTERY)) {
@@ -73,22 +46,32 @@ void store_phonebattery_vals(int lvl_val, int chg_val){
 }
 
 void toggle_phonebattery(uint8_t reload_origin) {
-    phonebattery_enabled = get_phonebattery_enabled();
+    phonebattery_enabled = is_module_enabled(MODULE_PHONEBATTERY);
     if (reload_origin == RELOAD_CONFIGS || reload_origin == RELOAD_DEFAULT) {
       phonebattery_interval = persist_exists(KEY_PHONEBATTERYTIME) ? persist_read_int(KEY_PHONEBATTERYTIME) : 5;
     }
     if (phonebattery_enabled) {
       update_phonebattery_from_storage();
       if (reload_origin == RELOAD_MODULE || reload_origin == RELOAD_CONFIGS) {
-	update_phonebattery(true);
+	force_update = true;
       }
     } else {
       set_phonebattery_layer_text("");
     }
 }
 
-bool is_phonebattery_enabled() {
-  return phonebattery_enabled;
+bool is_phonebattery_need_update() {
+    int current_time = (int)time(NULL);
+    bool fup = force_update;
+    force_update = false;
+    if ((current_time - last_update) >= phonebattery_expiration * 60) {
+      set_phonebattery_layer_text("");
+    }
+    return (phonebattery_enabled && (fup || last_update == 0 || (current_time - last_update) >= phonebattery_interval * 60));
+}
+
+void phonebattery_set_updatetime(int updtime) {
+  last_update = updtime;
 }
 
 #endif

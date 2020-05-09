@@ -21,7 +21,8 @@ Pebble.addEventListener('appmessage', function(e) {
     if (e.payload.KEY_HASUPDATE) {
         console.log('Checking for updates...');
         checkForUpdates();
-    } else if (e.payload.KEY_REQUESTWEATHER) {
+    }
+    if (e.payload.KEY_REQUESTWEATHER) {
         console.log('Fetching weather info...');
         var weatherKey = localStorage.weatherKey;
         var provider = 2;
@@ -57,10 +58,12 @@ Pebble.addEventListener('appmessage', function(e) {
             useCelsius,
             localStorage.overrideLocation
         );
-    } else if (e.payload.KEY_REQUESTCRYPTO) {
+    }
+    if (e.payload.KEY_REQUESTCRYPTO) {
         console.log('Retrieving cryptocurrencies...');
         getCryptocurrencies();
-    } else if (e.payload.KEY_REQUESTPHONEBATTERY) {
+    }
+    if (e.payload.KEY_REQUESTPHONEBATTERY) {
         console.log('Retrieving phone battery state...');
         getPhoneBattery();
     }

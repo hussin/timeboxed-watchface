@@ -17,8 +17,6 @@ static Window *watchface;
 
 #if defined(PBL_HEALTH)
 static int min_count = 0;
-static int min_count_phbatt = 0;
-static int min_count_crypto = 0;
 static uint8_t health_color_keys[] = {
     KEY_STEPSCOLOR,
     KEY_STEPSBEHINDCOLOR,
@@ -525,6 +523,49 @@ static void watchface_unload(Window *window) {
     destroy_text_layers();
 }
 
+static void request_update_from_js() {
+  int current_time = (int)time(NULL);
+  #if !defined PBL_PLATFORM_APLITE
+  bool needupdate = (is_weather_need_update() ||
+		     is_phonebattery_need_update() ||
+		     is_crypto_need_update());
+  #else
+  bool needupdate = (is_weather_need_update());
+  #endif
+  if (needupdate == true) {
+    DictionaryIterator *iter;
+    AppMessageResult result = app_message_outbox_begin(&iter);
+    if (result == APP_MSG_OK) {
+      if (is_weather_need_update()) {
+	dict_write_uint8(iter, KEY_REQUESTWEATHER, 1);
+      }
+
+      #if !defined PBL_PLATFORM_APLITE
+      if (is_phonebattery_need_update()) {
+	dict_write_uint8(iter, KEY_REQUESTPHONEBATTERY, 1);
+      }
+      if (is_crypto_need_update()) {
+	dict_write_uint8(iter, KEY_REQUESTCRYPTO, 1);
+      }
+      #endif
+      result = app_message_outbox_send();
+      if (result == APP_MSG_OK) {
+        if (is_weather_need_update()) {
+	  weather_set_updatetime(current_time);
+	}
+        #if !defined PBL_PLATFORM_APLITE	
+	if (is_phonebattery_need_update()) {
+	  phonebattery_set_updatetime(current_time);
+	}
+	if (is_crypto_need_update()) {
+	  crypto_set_updatetime(current_time);
+	}
+	#endif
+      }
+    }
+  }
+}
+
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
     if (is_module_enabled(MODULE_SECONDS)) {
         update_seconds(tick_time);
@@ -546,57 +587,19 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
     #endif
 
     if (units_changed & MINUTE_UNIT) {
-        if (is_weather_enabled()) {
-            #if defined(PBL_HEALTH)
-                if (is_user_sleeping()) {
-                    min_count++;
-                    if (min_count > 90) {
-                        update_weather(false);
-                        min_count = 0;
-                    }
-                } else {
-                    update_weather(false);
-                }
-            #else
-                update_weather(false);
-            #endif
-        }
-
-        #if !defined PBL_PLATFORM_APLITE
-        if (is_phonebattery_enabled()) {
-            #if defined(PBL_HEALTH)
-                if (is_user_sleeping()) {
-                    min_count_phbatt++;
-                    if (min_count_phbatt > 90) {
-                        update_phonebattery(false);
-                        min_count_phbatt = 0;
-                    }
-                } else {
-                    update_phonebattery(false);
-                }
-            #else
-                update_phonebattery(false);
-            #endif
-        }
-        #endif
-
-        #if !defined PBL_PLATFORM_APLITE
-        if (is_crypto_enabled()) {
-            #if defined(PBL_HEALTH)
-                if (is_user_sleeping()) {
-                    min_count_crypto++;
-                    if (min_count_crypto > 90) {
-                        update_crypto(false);;
-                        min_count_crypto = 0;
-                    }
-                } else {
-                    update_crypto(false);;
-                }
-            #else
-                update_crypto(false);;
-            #endif
-        }
-        #endif
+        #if defined(PBL_HEALTH) 
+        if (is_user_sleeping()) {
+	    min_count++;
+            if (min_count > 90) {
+	      request_update_from_js();
+	      min_count = 0;
+	    }
+	} else {
+	  request_update_from_js();
+	}
+	#else
+	request_update_from_js();
+	#endif
 
         update_time();
 

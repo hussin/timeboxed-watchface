@@ -5,6 +5,7 @@
 #include "clock.h"
 
 static bool weather_enabled;
+static bool force_update = false;
 static bool use_celsius;
 static int last_update = 0;
 static int weather_interval = 30;
@@ -58,22 +59,6 @@ static char* weather_conditions[] = {
     "\U0000F056", // tornado: 45
     "\U0000F073", // hurricane: 46
 };
-
-void update_weather(bool force) {
-    int current_time = (int)time(NULL);
-    if (force || last_update == 0 || (current_time - last_update) >= weather_interval * 60) {
-        DictionaryIterator *iter;
-        AppMessageResult result = app_message_outbox_begin(&iter);
-        if (result == APP_MSG_OK) {
-            dict_write_uint8(iter, KEY_REQUESTWEATHER, 1);
-            result = app_message_outbox_send();
-
-            if (result == APP_MSG_OK) {
-                last_update = current_time;
-            }
-        }
-    }
-}
 
 char* get_wind_direction_text(int degrees) {
     if (degrees > 349 || degrees <= 11) {
@@ -290,8 +275,8 @@ void toggle_weather(uint8_t reload_origin) {
     if (weather_enabled) {
         use_celsius = is_use_celsius_enabled();
         update_weather_from_storage();
-        if (reload_origin == RELOAD_MODULE || reload_origin == RELOAD_CONFIGS) {
-            update_weather(true);
+	if (reload_origin == RELOAD_MODULE || reload_origin == RELOAD_CONFIGS) {
+	  force_update = true;
         }
     } else {
         set_temp_cur_layer_text("");
@@ -320,6 +305,13 @@ void store_weather_values(int temp, int max, int min, int weather, int speed, in
     persist_write_int(KEY_SUNSET, sunset);
 }
 
-bool is_weather_enabled() {
-    return weather_enabled;
+bool is_weather_need_update() {
+    int current_time = (int)time(NULL);
+    bool fup = force_update;
+    force_update = false;
+    return (weather_enabled && (fup || last_update == 0 || (current_time - last_update) >= weather_interval * 60));
+}
+
+void weather_set_updatetime(int updtime) {
+  last_update = updtime;
 }
