@@ -8,5 +8,6 @@ bool is_phonebattery_enabled();
 void update_phonebattery_value(int, int);
 void toggle_phonebattery(uint8_t);
 void update_phonebattery(bool);
+void store_phonebattery_vals(int, int);
 #endif
 #endif

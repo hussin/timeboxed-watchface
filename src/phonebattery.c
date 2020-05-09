@@ -10,6 +10,8 @@ static bool phonebattery_enabled;
 static int last_update = 0;
 static int phonebattery_interval = 5;
 static int phonebattery_expiration = 30;
+static int phonebattery_level;
+static int phonebattery_charging;
 static AppTimer *retry_timer;
 
 static void retry_handler(void *context) { update_phonebattery(true); }
@@ -57,12 +59,26 @@ void update_phonebattery_value(int lvl_val, int chg_val) {
   }
 }
 
+void update_phonebattery_from_storage(){
+  if (persist_exists(KEY_PHONEBATTERY_LEVEL) && persist_exists(KEY_PHONEBATTERY_CHARGING)){
+    phonebattery_charging = persist_read_int(KEY_PHONEBATTERY_CHARGING);
+    phonebattery_level = persist_read_int(KEY_PHONEBATTERY_LEVEL);
+    update_phonebattery_value(phonebattery_level, phonebattery_charging);
+  }
+}
+
+void store_phonebattery_vals(int lvl_val, int chg_val){
+  persist_write_int(KEY_PHONEBATTERY_CHARGING, chg_val);
+  persist_write_int(KEY_PHONEBATTERY_LEVEL, lvl_val);
+}
+
 void toggle_phonebattery(uint8_t reload_origin) {
     phonebattery_enabled = get_phonebattery_enabled();
     if (reload_origin == RELOAD_CONFIGS || reload_origin == RELOAD_DEFAULT) {
       phonebattery_interval = persist_exists(KEY_PHONEBATTERYTIME) ? persist_read_int(KEY_PHONEBATTERYTIME) : 5;
     }
     if (phonebattery_enabled) {
+      update_phonebattery_from_storage();
       if (reload_origin == RELOAD_MODULE || reload_origin == RELOAD_CONFIGS) {
 	update_phonebattery(true);
       }

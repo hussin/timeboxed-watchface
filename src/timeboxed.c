@@ -167,6 +167,7 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
         int phbatt_chg_val = (int)phonebattery_charging->value->int32;
 
 	update_phonebattery_value(phbatt_lvl_val,phbatt_chg_val);
+	store_phonebattery_vals(phbatt_lvl_val, phbatt_chg_val);
         return;
     }
     #endif
