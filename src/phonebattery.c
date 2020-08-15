@@ -12,9 +12,7 @@ static int phonebattery_interval = 5;
 static int phonebattery_expiration = 30;
 static AppTimer *retry_timer;
 
-static void retry_handler(void *context) {
-    update_phonebattery(true);
-}
+static void retry_handler(void *context) { update_phonebattery(true); }
 
 void update_phonebattery(bool force) {
   int current_time = (int)time(NULL);
