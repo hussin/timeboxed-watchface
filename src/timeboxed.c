@@ -11,11 +11,13 @@
 #include "accel.h"
 #include "compass.h"
 #include "crypto.h"
+#include "phonebattery.h"
 
 static Window *watchface;
 
 #if defined(PBL_HEALTH)
 static int min_count = 0;
+static int min_count_phbatt = 0;
 static int min_count_crypto = 0;
 static uint8_t health_color_keys[] = {
     KEY_STEPSCOLOR,
@@ -154,6 +156,22 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
     }
     #endif
 
+    
+    #if !defined PBL_PLATFORM_APLITE
+    Tuple *phonebattery_level = dict_find(iterator, KEY_PHONEBATTERY_LEVEL);
+    Tuple *phonebattery_charging = dict_find(iterator, KEY_PHONEBATTERY_CHARGING);
+
+    if (phonebattery_level || phonebattery_charging) {
+
+        int phbatt_lvl_val = (int)phonebattery_level->value->int32;
+        int phbatt_chg_val = (int)phonebattery_charging->value->int32;
+
+	update_phonebattery_value(phbatt_lvl_val,phbatt_chg_val);
+	store_phonebattery_vals(phbatt_lvl_val, phbatt_chg_val);
+        return;
+    }
+    #endif
+
     int configs = 0;
     signed int tz_hour = 0;
     uint8_t tz_minute = 0;
@@ -272,8 +290,9 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
         KEY_WEATHERTIME,
         KEY_DATESEPARATOR,
         KEY_CRYPTOTIME,
+	KEY_PHONEBATTERYTIME,
     };
-    uint8_t num_int = 8;
+    uint8_t num_int = 9;
     #else
     uint32_t int_keys[] = {
         KEY_FONTTYPE,
@@ -305,6 +324,8 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
         KEY_UPDATECOLOR,
         KEY_BATTERYCOLOR,
         KEY_BATTERYLOWCOLOR,
+        KEY_PHONEBATTERYCOLOR,
+        KEY_PHONEBATTERYLOWCOLOR,	
         KEY_TEMPCOLOR,
         KEY_WEATHERCOLOR,
         KEY_MINCOLOR,
@@ -321,7 +342,7 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
         KEY_CRYPTOCCOLOR,
         KEY_CRYPTODCOLOR,
     };
-    uint8_t num_colors = 23;
+    uint8_t num_colors = 25;
     #else
     uint32_t color_keys[] = {
         KEY_BGCOLOR,
@@ -540,6 +561,24 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
                 update_weather(false);
             #endif
         }
+
+        #if !defined PBL_PLATFORM_APLITE
+        if (is_phonebattery_enabled()) {
+            #if defined(PBL_HEALTH)
+                if (is_user_sleeping()) {
+                    min_count_phbatt++;
+                    if (min_count_phbatt > 90) {
+                        update_phonebattery(false);
+                        min_count_phbatt = 0;
+                    }
+                } else {
+                    update_phonebattery(false);
+                }
+            #else
+                update_phonebattery(false);
+            #endif
+        }
+        #endif
 
         #if !defined PBL_PLATFORM_APLITE
         if (is_crypto_enabled()) {
