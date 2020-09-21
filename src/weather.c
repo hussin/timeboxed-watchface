@@ -8,6 +8,7 @@ static bool weather_enabled;
 static bool force_update = false;
 static bool use_celsius;
 static int last_update = 0;
+static int last_successful_update = 0;
 static int weather_interval = 30;
 
 static char* weather_conditions[] = {
@@ -60,6 +61,44 @@ static char* weather_conditions[] = {
     "\U0000F073", // hurricane: 46
 };
 
+<<<<<<< HEAD
+=======
+const int very_stale_weather_threshold = 121;
+const int stale_weather_threshold = 31;
+
+void update_expired_weather(int current_time) {
+  if(!current_time)
+    current_time = (int)time(NULL);
+  if(current_time - last_successful_update >= very_stale_weather_threshold * 60)
+    set_weather_layer_color(GColorFromHEX(0xFFAAAA));
+  else if(current_time - last_successful_update >= stale_weather_threshold * 60)
+    set_weather_layer_color(GColorFromHEX(0xFF5500));
+  else
+    set_weather_layer_color(GColorFromHEX(persist_read_int(KEY_TEMPCOLOR)));
+}
+
+void update_weather(bool force) {
+    int current_time = (int)time(NULL);
+    if (force || last_update == 0 || (current_time - last_update) >= weather_interval * 60) {
+        DictionaryIterator *iter;
+        AppMessageResult result = app_message_outbox_begin(&iter);
+        if (result == APP_MSG_OK) {
+            dict_write_uint8(iter, KEY_REQUESTWEATHER, 1);
+            result = app_message_outbox_send();
+
+            if (result == APP_MSG_OK) {
+                last_update = current_time;
+            }
+        }
+    }
+    // If we're on a color screen, color stale weather using hard-coded colors.
+    // TODO: Make these colors and the times to show them configurable.
+#if defined(PBL_COLOR)
+    update_expired_weather(current_time);
+#endif
+}
+
+>>>>>>> 8995fd4... Add updated_expired_weather and related code.
 char* get_wind_direction_text(int degrees) {
     if (degrees > 349 || degrees <= 11) {
         return "S"; // N -> S
@@ -265,6 +304,11 @@ static void update_weather_from_storage() {
     if (persist_exists(KEY_SUNSET)) {
         update_sunset(persist_read_int(KEY_SUNSET));
     }
+
+    if (persist_exists(KEY_WEATHER_LAST_UPDATED)) {
+      last_successful_update = persist_read_int(KEY_WEATHER_LAST_UPDATED);
+    }
+    update_expired_weather(0);
 }
 
 void toggle_weather(uint8_t reload_origin) {
@@ -304,6 +348,9 @@ void store_weather_values(int temp, int max, int min, int weather, int speed, in
     persist_write_int(KEY_DIRECTION, direction);
     persist_write_int(KEY_SUNRISE, sunrise);
     persist_write_int(KEY_SUNSET, sunset);
+    last_successful_update = (int)time(NULL);
+    persist_write_int(KEY_WEATHER_LAST_UPDATED, last_successful_update);
+    update_expired_weather(0);
 }
 
 bool is_weather_need_update() {
