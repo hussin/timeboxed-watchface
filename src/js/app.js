@@ -997,7 +997,7 @@ var getPhoneBattery = function () {
     if (!navigator.getBattery) {
         var data = {
             "KEY_PHONEBATTERY_LEVEL": 101,
-	    "KEY_PHONEBATTERY_CHARGING": 0,
+            "KEY_PHONEBATTERY_CHARGING": 0,
         };
         console.log('Phone battery not supported.');
         Pebble.sendAppMessage(data);
@@ -1006,10 +1006,10 @@ var getPhoneBattery = function () {
 
     navigator.getBattery().then(function(battery) {
         var level = Math.round(battery.level * 100);
-	var charging = battery.charging ? 1 : 0;
+        var charging = battery.charging ? 1 : 0;
         var data = {
             "KEY_PHONEBATTERY_LEVEL": level,
-	    "KEY_PHONEBATTERY_CHARGING": charging,
+            "KEY_PHONEBATTERY_CHARGING": charging,
         };
         console.log('Phone battery = ' + battery.level  + ".");
         console.log('Phone charging = ' + battery.charging  + ".");	
