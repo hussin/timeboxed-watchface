@@ -277,6 +277,7 @@ void toggle_weather(uint8_t reload_origin) {
         update_weather_from_storage();
         if (reload_origin == RELOAD_MODULE || reload_origin == RELOAD_CONFIGS) {
           force_update = true;
+
         }
     } else {
         set_temp_cur_layer_text("");

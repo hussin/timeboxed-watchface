@@ -968,6 +968,17 @@ class Layout extends Component {
                         />
                     </OptionGroup>
                 )}
+	        {this.isEnabled(['24']) && (
+                    <OptionGroup title={'Phone battery state'}>
+                        <RadioButtonGroup
+                            fieldName="phoneBatteryTime"
+                            label={'Refresh interval'}
+                            options={refreshTimes}
+                            selectedItem={state.phoneBatteryTime}
+                            onChange={this.onChange.bind(this, 'phoneBatteryTime')}
+                        />
+                    </OptionGroup>
+                )}	    
 
                 {this.isEnabled(['24']) && (
                     <OptionGroup title={'Phone battery state'}>
