@@ -71,7 +71,7 @@ class Layout extends Component {
             { value: '21', label: 'Cryptocurrency B' },
             { value: '22', label: 'Cryptocurrency C' },
             { value: '23', label: 'Cryptocurrency D' },
-	    { value: '24', label: 'Phone battery state'},
+            { value: '24', label: 'Phone battery state'},
         ];
 
         this.modulesAplite = this.modulesAll.filter(
@@ -968,8 +968,8 @@ class Layout extends Component {
                         />
                     </OptionGroup>
                 )}
-	    
-	        {this.isEnabled(['24']) && (
+
+                {this.isEnabled(['24']) && (
                     <OptionGroup title={'Phone battery state'}>
                         <RadioButtonGroup
                             fieldName="phoneBatteryTime"
@@ -979,7 +979,7 @@ class Layout extends Component {
                             onChange={this.onChange.bind(this, 'phoneBatteryTime')}
                         />
                     </OptionGroup>
-                )}	    
+                )}
 
                 <OptionGroup title={'Master Key (pmkey.xyz)'}>
                     <TextField
