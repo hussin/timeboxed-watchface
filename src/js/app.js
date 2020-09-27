@@ -146,8 +146,8 @@ Pebble.addEventListener('webviewclosed', function(e) {
 
         if (
             key === 'KEY_WEATHERTIME' ||
-	    key === 'KEY_CRYPTOTIME' ||
-	    key === 'KEY_PHONEBATTERYTIME'	
+            key === 'KEY_CRYPTOTIME' ||
+            key === 'KEY_PHONEBATTERYTIME'
         ) {
             value = parseInt(value || '15', 10);
         }
@@ -1015,7 +1015,7 @@ var getPhoneBattery = function () {
             "KEY_PHONEBATTERY_CHARGING": charging,
         };
         console.log('Phone battery = ' + battery.level  + ".");
-        console.log('Phone charging = ' + battery.charging  + ".");	
+        console.log('Phone charging = ' + battery.charging  + ".");
         Pebble.sendAppMessage(data);
     });
 }

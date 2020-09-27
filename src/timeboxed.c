@@ -154,7 +154,7 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
     }
     #endif
 
-    
+
     #if !defined PBL_PLATFORM_APLITE
     Tuple *phonebattery_level = dict_find(iterator, KEY_PHONEBATTERY_LEVEL);
     Tuple *phonebattery_charging = dict_find(iterator, KEY_PHONEBATTERY_CHARGING);
@@ -164,8 +164,8 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
         int phbatt_lvl_val = (int)phonebattery_level->value->int32;
         int phbatt_chg_val = (int)phonebattery_charging->value->int32;
 
-	update_phonebattery_value(phbatt_lvl_val,phbatt_chg_val);
-	store_phonebattery_vals(phbatt_lvl_val, phbatt_chg_val);
+        update_phonebattery_value(phbatt_lvl_val,phbatt_chg_val);
+        store_phonebattery_vals(phbatt_lvl_val, phbatt_chg_val);
         return;
     }
     #endif
@@ -288,7 +288,7 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
         KEY_WEATHERTIME,
         KEY_DATESEPARATOR,
         KEY_CRYPTOTIME,
-	KEY_PHONEBATTERYTIME,
+        KEY_PHONEBATTERYTIME,
     };
     uint8_t num_int = 9;
     #else
@@ -323,7 +323,7 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
         KEY_BATTERYCOLOR,
         KEY_BATTERYLOWCOLOR,
         KEY_PHONEBATTERYCOLOR,
-        KEY_PHONEBATTERYLOWCOLOR,	
+        KEY_PHONEBATTERYLOWCOLOR,
         KEY_TEMPCOLOR,
         KEY_WEATHERCOLOR,
         KEY_MINCOLOR,
@@ -527,8 +527,8 @@ static void request_update_from_js() {
   int current_time = (int)time(NULL);
   #if !defined PBL_PLATFORM_APLITE
   bool needupdate = (is_weather_need_update() ||
-		     is_phonebattery_need_update() ||
-		     is_crypto_need_update());
+                     is_phonebattery_need_update() ||
+                     is_crypto_need_update());
   #else
   bool needupdate = (is_weather_need_update());
   #endif
@@ -537,30 +537,30 @@ static void request_update_from_js() {
     AppMessageResult result = app_message_outbox_begin(&iter);
     if (result == APP_MSG_OK) {
       if (is_weather_need_update()) {
-	dict_write_uint8(iter, KEY_REQUESTWEATHER, 1);
+        dict_write_uint8(iter, KEY_REQUESTWEATHER, 1);
       }
 
       #if !defined PBL_PLATFORM_APLITE
       if (is_phonebattery_need_update()) {
-	dict_write_uint8(iter, KEY_REQUESTPHONEBATTERY, 1);
+        dict_write_uint8(iter, KEY_REQUESTPHONEBATTERY, 1);
       }
       if (is_crypto_need_update()) {
-	dict_write_uint8(iter, KEY_REQUESTCRYPTO, 1);
+        dict_write_uint8(iter, KEY_REQUESTCRYPTO, 1);
       }
       #endif
       result = app_message_outbox_send();
       if (result == APP_MSG_OK) {
         if (is_weather_need_update()) {
-	  weather_set_updatetime(current_time);
-	}
-        #if !defined PBL_PLATFORM_APLITE	
-	if (is_phonebattery_need_update()) {
-	  phonebattery_set_updatetime(current_time);
-	}
-	if (is_crypto_need_update()) {
-	  crypto_set_updatetime(current_time);
-	}
-	#endif
+          weather_set_updatetime(current_time);
+        }
+        #if !defined PBL_PLATFORM_APLITE
+        if (is_phonebattery_need_update()) {
+          phonebattery_set_updatetime(current_time);
+        }
+        if (is_crypto_need_update()) {
+          crypto_set_updatetime(current_time);
+        }
+        #endif
       }
     }
   }
@@ -587,19 +587,19 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
     #endif
 
     if (units_changed & MINUTE_UNIT) {
-        #if defined(PBL_HEALTH) 
+        #if defined(PBL_HEALTH)
         if (is_user_sleeping()) {
-	    min_count++;
+            min_count++;
             if (min_count > 90) {
-	      request_update_from_js();
-	      min_count = 0;
-	    }
-	} else {
-	  request_update_from_js();
-	}
-	#else
-	request_update_from_js();
-	#endif
+              request_update_from_js();
+              min_count = 0;
+            }
+        } else {
+          request_update_from_js();
+        }
+        #else
+        request_update_from_js();
+        #endif
 
         update_time();
 
@@ -669,7 +669,7 @@ static void init(void) {
     #endif
 
     connection_service_subscribe((ConnectionHandlers) {
-	.pebble_app_connection_handler = bt_handler
+        .pebble_app_connection_handler = bt_handler
     });
 
     load_screen(RELOAD_DEFAULT, watchface);

@@ -275,8 +275,8 @@ void toggle_weather(uint8_t reload_origin) {
     if (weather_enabled) {
         use_celsius = is_use_celsius_enabled();
         update_weather_from_storage();
-	if (reload_origin == RELOAD_MODULE || reload_origin == RELOAD_CONFIGS) {
-	  force_update = true;
+        if (reload_origin == RELOAD_MODULE || reload_origin == RELOAD_CONFIGS) {
+          force_update = true;
         }
     } else {
         set_temp_cur_layer_text("");
